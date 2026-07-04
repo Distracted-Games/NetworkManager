@@ -24,10 +24,16 @@ local REMOTE_REPLICATION_TIMEOUT_SECONDS = 2
 local REMOTE_FOLDER_PARENT = ReplicatedStorage
 local REMOTE_FOLDER_NAME = "Remotes"
 
+export type Middleware = (...any) -> (boolean, string?)
+
 local Network = {}
 -- Expose enums for external use in other scripts.
 Network.RemoteEvents = RemoteEventName
 Network.RemoteFunctions = RemoteFunctionName
+Network.Middleware = {
+    Admin = require(script.Middleware.Admin),
+    RateLimit = require(script.Middleware.RateLimit),
+}
 Network._started = false
 Network._remoteFolder = nil :: Folder?
 
@@ -93,28 +99,67 @@ end
 --[[
     Connects a callback to a RemoteEvent, automatically handling the distinction
 	between OnServerEvent and OnClientEvent.
+    
+    Optional middlewares can be provided to intercept the event before the callback runs.
 ]]
-function Network.connectEvent(eventName: RemoteEventName.EnumType, callback: (...any) -> ()): RBXScriptConnection
+function Network.connectEvent(
+    eventName: RemoteEventName.EnumType,
+    callback: (...any) -> (),
+    middlewares: { Middleware }?
+): RBXScriptConnection
 	local remoteEvent = Network._getRemoteEvent(eventName)
 
+    local function wrapper(...)
+        if middlewares then
+            for _, middleware in middlewares do
+                local success, _reason = middleware(...)
+                if not success then
+                    return
+                end
+            end
+        end
+        
+        callback(...)
+    end
+
 	if RunService:IsServer() then
-		return remoteEvent.OnServerEvent:Connect(callback)
+		return remoteEvent.OnServerEvent:Connect(wrapper)
 	else
-		return remoteEvent.OnClientEvent:Connect(callback)
+		return remoteEvent.OnClientEvent:Connect(wrapper)
 	end
 end
 
 --[[
 	Binds a callback to a RemoteFunction, automatically handling the distinction
 	between OnServerInvoke and OnClientInvoke.
+    
+    Optional middlewares can be provided to intercept the event before the callback runs.
+    If a middleware fails, an error is thrown with the rejection reason.
 ]]
-function Network.bindFunction(functionName: RemoteFunctionName.EnumType, callback: (...any) -> ...any): ...any
+function Network.bindFunction(
+    functionName: RemoteFunctionName.EnumType,
+    callback: (...any) -> ...any,
+    middlewares: { Middleware }?
+): ()
 	local remoteFunction = Network._getRemoteFunction(functionName)
 
+    local function wrapper(...)
+        if middlewares then
+            for _, middleware in middlewares do
+                local success, reason = middleware(...)
+                if not success then
+                    error(reason or "Middleware rejected the request")
+                end
+            end
+        end
+
+        return callback(...)
+    end
+
 	if RunService:IsServer() then
-		remoteFunction.OnServerInvoke = callback
+		remoteFunction.OnServerInvoke = wrapper
 	else
-		remoteFunction.OnClientInvoke = callback
+		remoteFunction.OnClientInvoke = wrapper
 	end
 end
 
