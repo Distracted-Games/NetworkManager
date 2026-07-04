@@ -1,6 +1,10 @@
 --!strict
 
 --[[
+    Network
+    @author DistractedGames
+    @version 1.2.0
+
     A network abstraction layer that manages RemoteEvent and RemoteFunction
 	instances automatically. It provides a clean, type-safe API for remote
 	communication without needing to manually instance or find remotes. It also
