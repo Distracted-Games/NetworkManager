@@ -31,6 +31,7 @@ local Network = {}
 Network.RemoteEvents = RemoteEventName
 Network.RemoteFunctions = RemoteFunctionName
 Network.Middleware = {
+    Admin = require(script.Middleware.Admin),
     RateLimit = require(script.Middleware.RateLimit),
 }
 Network._started = false
