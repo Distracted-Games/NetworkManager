@@ -1,6 +1,6 @@
-# Network Library
+# Remotes
 
-The `Network` library provides a type-safe, high-level interface for RemoteEvents and RemoteFunctions in Roblox. It automatically manages the creation, replication, and invocation of remotes, meaning you no longer have to manually create folders, assign remotes, or handle client/server differences.
+The `Remotes` network library provides a type-safe, high-level interface for RemoteEvents and RemoteFunctions in Roblox. It automatically manages the creation, replication, and invocation of remotes, meaning you no longer have to manually create folders, assign remotes, or handle client/server differences.
 
 By enforcing argument type safety and abstracting away the boilerplate, this library reduces runtime errors and makes networking incredibly simple. It also features a powerful, optional [Middleware](#middleware) system that allows you to secure your network events (like adding rate-limiters or admin checks) without cluttering your core game logic.
 
@@ -8,9 +8,9 @@ By enforcing argument type safety and abstracting away the boilerplate, this lib
 
 ## Installation
 
-You can install the latest version of NetworkManager directly from GitHub:
+You can install the latest version of Remotes directly from GitHub:
 
-1. Navigate to the [Latest Release Page](https://github.com/Distracted-Games/NetworkManager/releases/latest).
+1. Navigate to the [Latest Release Page](https://github.com/Distracted-Games/Remotes/releases/latest).
 2. Download the `.rbxm` file attached to the release.
 3. Drag and drop the `.rbxm` file into Roblox Studio, moving the contents to inside `ReplicatedStorage`.
 
